@@ -26,7 +26,7 @@ function App() {
           }}>Sign out</button>
         </>
       ) : (
-        <button onClick={() => auth.signinRedirect()}>Sign in</button>
+        <button className='btn btn-primary' onClick={() => auth.signinRedirect()}>Sign in</button>
       )}
     </div>
   );
