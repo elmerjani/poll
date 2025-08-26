@@ -41,9 +41,10 @@ const PollDetail: React.FC = () => {
   const totalVotes = getTotalVotes(sortedOptions);
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black w-full">
       <Header />
-      <main className="container mx-auto py-12 px-6 pb-24 max-w-4xl">
+      <main className="w-full py-12 px-6 pb-24">
+        <div className="max-w-6xl mx-auto">
         {/* Poll Header */}
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
@@ -225,6 +226,7 @@ const PollDetail: React.FC = () => {
             </div>
           </motion.div>
         </motion.div>
+        </div>
       </main>
       <Footer />
     </div>

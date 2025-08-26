@@ -12,9 +12,9 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black w-full">
       <Header />
-      <main className="container mx-auto py-12 px-6 pb-24">
+      <main className="w-full py-12 px-6 pb-24">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -32,7 +32,7 @@ const Home = () => {
         </motion.div>
 
         {/* Polls */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8 w-full px-4">
           {polls.map((poll, index) => (
             <motion.div
               key={poll.id}
