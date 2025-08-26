@@ -11,6 +11,19 @@ const cognitoAuthConfig = {
 };
 
 export default function Component({ children }: { children: ReactNode }) {
-  console.log(cognitoAuthConfig)
-  return <AuthProvider {...cognitoAuthConfig}>{children}</AuthProvider>;
+  console.log(cognitoAuthConfig);
+  return (
+    <AuthProvider
+      {...cognitoAuthConfig}
+      onSigninCallback={() => {
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        );
+      }}
+    >
+      {children}
+    </AuthProvider>
+  );
 }
