@@ -5,7 +5,7 @@ import { Footer } from '../layout/Footer';
 import { motion } from 'framer-motion';
 
 const Home = () => {
-  const { polls, voteOnOption } = usePolls();
+  const { polls, loading, error, voteOnOption } = usePolls();
 
   const handleVote = (pollId: string, optionId: string) => {
     voteOnOption(pollId, optionId);
@@ -29,28 +29,52 @@ const Home = () => {
           <p className="text-xl text-gray-400 font-light max-w-2xl mx-auto leading-relaxed">
             Vote on the latest polls and see real-time results
           </p>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-4 p-3 bg-yellow-500/10 border border-yellow-400/30 rounded-lg max-w-md mx-auto"
+            >
+              <p className="text-yellow-300 text-sm">⚠️ {error}</p>
+            </motion.div>
+          )}
         </motion.div>
 
+        {/* Loading State */}
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-16"
+          >
+            <div className="w-16 h-16 border-4 border-green-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-white text-xl font-light">Loading polls...</p>
+          </motion.div>
+        )}
+
         {/* Polls */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8 w-full px-4">
-          {polls.map((poll, index) => (
-            <motion.div
-              key={poll.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-            >
-              <PollItem
-                id={poll.id}
-                question={poll.question}
-                options={poll.options}
-                createdBy={poll.createdBy}
-                createdOn={poll.createdOn}
-                onVote={(optionId) => handleVote(poll.id, optionId)}
-              />
-            </motion.div>
-          ))}
-        </div>
+        {!loading && (
+          <div className="poll-grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 w-full px-4">
+            {polls.map((poll, index) => (
+              <motion.div
+                key={poll.id || poll.pollId}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="h-full"
+              >
+                <PollItem
+                  id={poll.id || poll.pollId}
+                  question={poll.question}
+                  options={poll.options}
+                  createdBy={poll.createdBy}
+                  createdOn={poll.createdOn}
+                  onVote={(optionId) => handleVote(poll.id || poll.pollId, optionId)}
+                />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </main>
       <Footer />
     </div>

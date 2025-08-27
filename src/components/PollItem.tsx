@@ -81,7 +81,7 @@ export const PollItem: React.FC<PollItemProps> = ({
         
         {/* Options */}
         <div className="relative z-10 space-y-3">
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {sortedOptions.map((option, index) => {
               const percent = totalVotes ? Math.round((option.votes / totalVotes) * 100) : 0;
               const isClicked = clickedOption === option.id;
@@ -155,7 +155,7 @@ export const PollItem: React.FC<PollItemProps> = ({
                           animate={{ scale: 1 }}
                           className="text-yellow-400 text-sm"
                         >
-                          👑
+                          
                         </motion.span>
                       )}
                       <span className="font-medium text-white">{option.text}</span>

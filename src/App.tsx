@@ -4,9 +4,13 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import PollDetail from './pages/PollDetail';
 import { motion } from 'framer-motion';
+import { useApiAuth } from './hooks/useApiAuth';
 
 function App() {
   const auth = useAuth();
+  
+  // Initialize API authentication
+  useApiAuth();
 
   if (auth.isLoading) {
     return (
