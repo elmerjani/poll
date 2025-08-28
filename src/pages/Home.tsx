@@ -98,14 +98,11 @@ const Home = () => {
                 className="h-full"
               >
                 <PollItem
-                  id={poll.pollId}
+                  pollId={poll.pollId}
                   question={poll.question}
                   options={poll.options}
                   createdBy={poll.owner.name}
                   createdAt={poll.createdAt}
-                  onVote={(optionId) =>
-                    handleVote( poll.pollId, optionId)
-                  }
                 />
               </motion.div>
             ))}

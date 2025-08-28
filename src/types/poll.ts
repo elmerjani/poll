@@ -11,4 +11,5 @@ export interface PollExample {
   createdAt: string;
   owner: Owner;
   options: OptionExample[];
+  userOption?:number
 }

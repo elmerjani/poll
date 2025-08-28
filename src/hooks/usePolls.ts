@@ -1,29 +1,30 @@
 import { useState, useEffect } from "react";
-import { getAllPolls, createPollApi } from "../api/polls";
+import { getAllPolls, createPollApi, getAllPollsAuth } from "../api/polls";
+import type { PollExample } from "../types/poll";
+import { useAuth } from "react-oidc-context";
 
 export function usePolls() {
-  const [polls, setPolls] = useState<
-    {
-      pollId: string;
-      question: string;
-      createdAt: string;
-      owner: { name: string; email: string };
-      options: { id: number; text: string; votesCount: number }[];
-    }[]
-  >([]);
+  const auth = useAuth()
+  const [polls, setPolls] = useState<PollExample[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
     fetchPolls();
   }, []);
-  
+
   const fetchPolls = async () => {
     try {
       setLoading(true);
       setError(null);
-      const apiPolls = await getAllPolls();
-
+      // const apiPolls = await getAllPolls();
+      let apiPolls;
+      if(auth.isAuthenticated && auth.user && auth.user.id_token){
+        apiPolls = await getAllPollsAuth({idToken:auth.user.id_token})
+      }
+      else{
+        apiPolls = await getAllPolls();
+      }
       setPolls(apiPolls);
     } catch (err) {
       console.warn("Failed to fetch polls from API, using mock data:", err);
@@ -81,23 +82,6 @@ export function usePolls() {
     }
   };
 
-  // Delete poll (if needed)
-  const deletePoll = async (pollId: string) => {
-    try {
-      // Optimistic update
-      setPolls((prevPolls) =>
-        prevPolls.filter((poll) => poll.pollId !== pollId && poll.pollId !== pollId)
-      );
-
-      // If you implement a delete endpoint, uncomment this:
-      // await deletePollAPI(pollId);
-    } catch (err) {
-      console.error("Failed to delete poll:", err);
-      // Revert optimistic update on error
-      await fetchPolls();
-    }
-  };
-
   // Refresh polls
   const refreshPolls = () => {
     fetchPolls();
@@ -109,7 +93,6 @@ export function usePolls() {
     error,
     createPoll, // NEW: Create poll function
     voteOnOption,
-    deletePoll, // NEW: Delete poll function
     refreshPolls,
     setPolls, // Keep for backward compatibility
   };

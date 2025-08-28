@@ -6,30 +6,11 @@ import PollDetail from "./pages/PollDetail";
 import CreatePoll from "./pages/CreatePoll";
 import { motion } from "framer-motion";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { WebSocketProvider } from "./contexts/WebSocketContext";
 
 function App() {
   const auth = useAuth();
-  
-  const socket = new WebSocket(
-    "wss://ahn3a6nc6e.execute-api.us-east-1.amazonaws.com/dev"
-  );
-
-  socket.onopen = () => {
-    console.log("Connected to WebSocket");
-  };
-
-  socket.onmessage = (event) => {
-    console.log("Message from server:", event.data);
-  };
-
-  socket.onerror = (error) => {
-    console.error("WebSocket error:", error);
-  };
-
-  socket.onclose = () => {
-    console.log("Disconnected from WebSocket");
-  };
-
+  console.log(auth.user)
   if (auth.isLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -45,22 +26,25 @@ function App() {
       </div>
     );
   }
-
+  const token = auth.user?.id_token;
+  const WEBSOCKET_URL = `${import.meta.env.VITE_WEBSOCKET_URL}?token=${token}`;
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route
-          path="/create"
-          element={
-            <ProtectedRoute>
-              <CreatePoll />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/poll/:id" element={<PollDetail />} />
-      </Routes>
-    </BrowserRouter>
+    <WebSocketProvider url={WEBSOCKET_URL}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/create"
+            element={
+              <ProtectedRoute>
+                <CreatePoll />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/poll/:id" element={<PollDetail />} />
+        </Routes>
+      </BrowserRouter>
+    </WebSocketProvider>
   );
 }
 
