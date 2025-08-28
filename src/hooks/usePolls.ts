@@ -1,70 +1,72 @@
-import { useState, useEffect } from 'react';
-import { getAllPolls } from '../api/polls';
-import { mockPolls } from '../utils/mockData';
-import type { Poll } from '../types/poll';
+import { useState, useEffect } from "react";
+import { getAllPolls, createPollApi } from "../api/polls";
 
 export function usePolls() {
-  const [polls, setPolls] = useState<Poll[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [polls, setPolls] = useState<
+    {
+      pollId: string;
+      question: string;
+      createdAt: string;
+      owner: { name: string; email: string };
+      options: { id: number; text: string; votesCount: number }[];
+    }[]
+  >([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Fetch polls from API
+  
+  useEffect(() => {
+    fetchPolls();
+  }, []);
+  
   const fetchPolls = async () => {
     try {
       setLoading(true);
       setError(null);
       const apiPolls = await getAllPolls();
-      
-      // Transform API data to match our component structure
-      const transformedPolls: Poll[] = apiPolls.map(poll => ({
-        pollId: poll.pollId,
-        id: poll.pollId, // For backward compatibility
-        question: poll.question,
-        options: poll.options,
-        createdBy: poll.createdBy,
-        createdAt: poll.createdAt,
-        createdOn: new Date(poll.createdAt).toLocaleDateString()
-      }));
-      
-      setPolls(transformedPolls);
+
+      setPolls(apiPolls);
     } catch (err) {
-      console.warn('Failed to fetch polls from API, using mock data:', err);
-      setError('Failed to load polls from server');
-      // Fallback to mock data - transform to match Poll type
-      const transformedMockPolls: Poll[] = mockPolls.map(poll => ({
-        pollId: poll.id,
-        id: poll.id,
-        question: poll.question,
-        options: poll.options,
-        createdBy: poll.createdBy,
-        createdAt: new Date().toISOString(),
-        createdOn: poll.createdOn
-      }));
-      setPolls(transformedMockPolls);
+      console.warn("Failed to fetch polls from API, using mock data:", err);
+      setError("Failed to load polls from server");
     } finally {
       setLoading(false);
     }
   };
 
-  // Load polls on mount
-  useEffect(() => {
-    fetchPolls();
-  }, []);
+  // Create new poll
+  const createPoll = async ({
+    question,
+    options,
+    idToken,
+  }: {
+    question: string;
+    options: string[];
+    idToken: string | undefined;
+  }): Promise<string> => {
+    try {
+      const response = await createPollApi({ question, options, idToken });
+      console.log(response);
+      return response.message;
+    } catch (err) {
+      console.error("Failed to create poll:", err);
+      throw new Error("Failed to create poll. Please try again.");
+    }
+  };
 
   // Vote on option (local update + API call)
-  const voteOnOption = async (pollId: string, optionId: string) => {
+  const voteOnOption = async (pollId: string, optionId: number) => {
     try {
       // Optimistic update
-      setPolls(prevPolls => 
-        prevPolls.map(poll => 
-          (poll.id === pollId || poll.pollId === pollId)
+      setPolls((prevPolls) =>
+        prevPolls.map((poll) =>
+          poll.pollId === pollId || poll.pollId === pollId
             ? {
                 ...poll,
-                options: poll.options.map(option =>
+                options: poll.options.map((option) =>
                   option.id === optionId
-                    ? { ...option, votes: option.votes + 1 }
+                    ? { ...option, votes: option.votesCount + 1 }
                     : option
-                )
+                ),
               }
             : poll
         )
@@ -72,9 +74,25 @@ export function usePolls() {
 
       // If you implement a voting endpoint, uncomment this:
       // await votePoll(pollId, { optionId });
-      
     } catch (err) {
-      console.error('Failed to vote:', err);
+      console.error("Failed to vote:", err);
+      // Revert optimistic update on error
+      await fetchPolls();
+    }
+  };
+
+  // Delete poll (if needed)
+  const deletePoll = async (pollId: string) => {
+    try {
+      // Optimistic update
+      setPolls((prevPolls) =>
+        prevPolls.filter((poll) => poll.pollId !== pollId && poll.pollId !== pollId)
+      );
+
+      // If you implement a delete endpoint, uncomment this:
+      // await deletePollAPI(pollId);
+    } catch (err) {
+      console.error("Failed to delete poll:", err);
       // Revert optimistic update on error
       await fetchPolls();
     }
@@ -85,12 +103,14 @@ export function usePolls() {
     fetchPolls();
   };
 
-  return { 
-    polls, 
-    loading, 
-    error, 
-    voteOnOption, 
+  return {
+    polls,
+    loading,
+    error,
+    createPoll, // NEW: Create poll function
+    voteOnOption,
+    deletePoll, // NEW: Delete poll function
     refreshPolls,
-    setPolls // Keep for backward compatibility
+    setPolls, // Keep for backward compatibility
   };
 }

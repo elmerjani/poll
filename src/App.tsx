@@ -1,16 +1,34 @@
 import "./App.css";
 import { useAuth } from "react-oidc-context";
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import PollDetail from './pages/PollDetail';
-import { motion } from 'framer-motion';
-import { useApiAuth } from './hooks/useApiAuth';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import PollDetail from "./pages/PollDetail";
+import CreatePoll from "./pages/CreatePoll";
+import { motion } from "framer-motion";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const auth = useAuth();
   
-  // Initialize API authentication
-  useApiAuth();
+  const socket = new WebSocket(
+    "wss://ahn3a6nc6e.execute-api.us-east-1.amazonaws.com/dev"
+  );
+
+  socket.onopen = () => {
+    console.log("Connected to WebSocket");
+  };
+
+  socket.onmessage = (event) => {
+    console.log("Message from server:", event.data);
+  };
+
+  socket.onerror = (error) => {
+    console.error("WebSocket error:", error);
+  };
+
+  socket.onclose = () => {
+    console.log("Disconnected from WebSocket");
+  };
 
   if (auth.isLoading) {
     return (
@@ -28,11 +46,18 @@ function App() {
     );
   }
 
-  // Always show the polling interface - no authentication required for viewing/voting
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route
+          path="/create"
+          element={
+            <ProtectedRoute>
+              <CreatePoll />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/poll/:id" element={<PollDetail />} />
       </Routes>
     </BrowserRouter>

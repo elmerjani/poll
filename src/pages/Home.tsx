@@ -1,13 +1,16 @@
-import { usePolls } from '../hooks/usePolls';
-import { PollItem } from '../components/PollItem';
-import { Header } from '../layout/Header';
-import { Footer } from '../layout/Footer';
-import { motion } from 'framer-motion';
+import { usePolls } from "../hooks/usePolls";
+import { PollItem } from "../components/PollItem";
+import { Header } from "../layout/Header";
+import { Footer } from "../layout/Footer";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { CreatePollFAB } from "../components/CreatePollFAB";
+import { useAuth } from "react-oidc-context";
 
 const Home = () => {
   const { polls, loading, error, voteOnOption } = usePolls();
-
-  const handleVote = (pollId: string, optionId: string) => {
+  const auth = useAuth();
+  const handleVote = (pollId: string, optionId: number) => {
     voteOnOption(pollId, optionId);
   };
 
@@ -52,24 +55,57 @@ const Home = () => {
           </motion.div>
         )}
 
+        {/* Empty State */}
+        {!loading && polls.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center py-16"
+          >
+            <div className="flex justify-center mb-6">
+              <div className="bg-white rounded-lg ">
+                <img
+                  src="/logo.png"
+                  alt="App Logo"
+                  className="w-10 h-10 rounded-lg"
+                />
+              </div>
+            </div>
+            <h2 className="text-xl text-gray-400 mb-2">No polls yet</h2>
+            <p className="text-gray-500 mb-6">Be the first to create a poll!</p>
+            {auth.isAuthenticated && (
+              <Link
+                to="/create"
+                className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
+              >
+                <span>+</span>
+                <span>Create First Poll</span>
+              </Link>
+            )}
+          </motion.div>
+        )}
+
         {/* Polls */}
-        {!loading && (
+        {!loading && polls.length > 0 && (
           <div className="poll-grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 w-full px-4">
             {polls.map((poll, index) => (
               <motion.div
-                key={poll.id || poll.pollId}
+                key={poll.pollId}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className="h-full"
               >
                 <PollItem
-                  id={poll.id || poll.pollId}
+                  id={poll.pollId}
                   question={poll.question}
                   options={poll.options}
-                  createdBy={poll.createdBy}
-                  createdOn={poll.createdOn}
-                  onVote={(optionId) => handleVote(poll.id || poll.pollId, optionId)}
+                  createdBy={poll.owner.name}
+                  createdAt={poll.createdAt}
+                  onVote={(optionId) =>
+                    handleVote( poll.pollId, optionId)
+                  }
                 />
               </motion.div>
             ))}
@@ -77,6 +113,9 @@ const Home = () => {
         )}
       </main>
       <Footer />
+
+      {/* Floating Action Button */}
+      {auth.isAuthenticated && <CreatePollFAB />}
     </div>
   );
 };

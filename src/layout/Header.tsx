@@ -103,7 +103,7 @@ export const Header: React.FC = () => {
                     <Link
                       to="/"
                       onClick={() => setShowUserMenu(false)}
-                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2"
+                      className="px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2"
                     >
                       <FiHome className="inline-block text-lg" /> Home
                     </Link>
@@ -113,7 +113,7 @@ export const Header: React.FC = () => {
                         auth.removeUser();
                         signOutRedirect();
                       }}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-sm text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-colors flex items-center gap-2"
                     >
                       <FiLogOut className="inline-block text-lg" /> Sign Out
                     </button>

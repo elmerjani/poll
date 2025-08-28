@@ -1,21 +1,15 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { sortOptionsByVotes } from '../utils/mockData';
-
-interface PollOption {
-  id: string;
-  text: string;
-  votes: number;
-}
+import { sortOptionsByVotes } from '../utils/constants';
 
 interface PollItemProps {
   id?: string;
   question: string;
-  options: PollOption[];
-  onVote?: (optionId: string) => void;
+  options: {id: number; text: string; votesCount: number}[];
+  onVote?: (optionId: number) => void;
   createdBy?: string;
-  createdOn?: string;
+  createdAt?: string;
 }
 
 export const PollItem: React.FC<PollItemProps> = ({ 
@@ -24,16 +18,16 @@ export const PollItem: React.FC<PollItemProps> = ({
   options, 
   onVote, 
   createdBy, 
-  createdOn 
+  createdAt 
 }) => {
-  const [clickedOption, setClickedOption] = useState<string | null>(null);
+  const [clickedOption, setClickedOption] = useState<number | null>(null);
   const [isVoting, setIsVoting] = useState(false);
   
   // Sort options by votes (highest first)
   const sortedOptions = sortOptionsByVotes(options);
-  const totalVotes = sortedOptions.reduce((sum, opt) => sum + opt.votes, 0);
+  const totalVotes = sortedOptions.reduce((sum, opt) => sum + opt.votesCount, 0);
 
-  const handleVote = async (optionId: string) => {
+  const handleVote = async (optionId: number) => {
     if (isVoting) return; // Prevent double clicks
     
     setIsVoting(true);
@@ -62,7 +56,7 @@ export const PollItem: React.FC<PollItemProps> = ({
           </div>
           <div className="ml-3">
             <p className="font-medium text-white text-sm">{createdBy || 'Anonymous'}</p>
-            <p className="text-xs text-gray-400">{createdOn || 'Today'}</p>
+            <p className="text-xs text-gray-400">{createdAt || 'Today'}</p>
           </div>
         </div>
 
@@ -83,9 +77,9 @@ export const PollItem: React.FC<PollItemProps> = ({
         <div className="relative z-10 space-y-3">
           <AnimatePresence>
             {sortedOptions.map((option, index) => {
-              const percent = totalVotes ? Math.round((option.votes / totalVotes) * 100) : 0;
+              const percent = totalVotes ? Math.round((option.votesCount / totalVotes) * 100) : 0;
               const isClicked = clickedOption === option.id;
-              const isTopOption = index === 0 && option.votes > 0;
+              const isTopOption = index === 0 && option.votesCount > 0;
               
               return (
                 <motion.button
@@ -182,7 +176,7 @@ export const PollItem: React.FC<PollItemProps> = ({
                         }}
                         transition={{ duration: 0.2 }}
                       >
-                        {option.votes}
+                        {option.votesCount}
                       </motion.span>
                     </div>
                   </div>
@@ -198,14 +192,9 @@ export const PollItem: React.FC<PollItemProps> = ({
           animate={{ opacity: isVoting ? 0.7 : 1 }}
           transition={{ duration: 0.3 }}
         >
-          <motion.span
-            key={totalVotes} // Re-animate when total changes
-            initial={{ scale: 1.2, color: '#10b981' }}
-            animate={{ scale: 1, color: '#9ca3af' }}
-            transition={{ duration: 0.5 }}
-          >
-            {totalVotes} total votes
-          </motion.span>
+          <span>{totalVotes} total votes</span>
+          <span className="mx-2" />
+          <span className="text-xs bg-green-500/10 text-green-300 px-3 py-1 rounded-lg">{isVoting ? '⏳ Voting...' : 'Tap to vote'}</span>
         </motion.div>
       </div>
     </motion.div>
