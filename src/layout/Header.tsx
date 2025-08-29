@@ -28,7 +28,7 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white/5 backdrop-blur-sm border-b border-white/10 sticky top-0 z-50 w-full">
+    <header className="bg-white/5 bg-glass border-b border-white/10 sticky top-0 z-50 w-full">
       <div className="w-full flex justify-between items-center py-4 px-6">
         {/* Logo and App Name */}
         <Link
@@ -55,7 +55,7 @@ export const Header: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="w-8 h-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl flex items-center justify-center hover:border-white/20 transition-all duration-300">
+              <div className="w-8 h-8 bg-white/5 bg-glass border border-white/10 rounded-xl flex items-center justify-center hover:border-white/20 transition-all duration-300">
                 <span className="text-white font-semibold text-sm">
                   {getUserInitial()}
                 </span>
@@ -132,7 +132,7 @@ export const Header: React.FC = () => {
         ) : (
           <motion.button
             onClick={() => auth.signinRedirect()}
-            className="bg-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 text-white font-medium px-6 py-3 rounded-xl transition-all duration-300 flex items-center space-x-3"
+            className="bg-white/5 bg-glass border border-white/10 hover:border-white/20 text-white font-medium px-6 py-3 rounded-xl transition-all duration-300 flex items-center space-x-3"
             whileHover={{
               scale: 1.02,
               borderColor: "rgba(255, 255, 255, 0.3)",

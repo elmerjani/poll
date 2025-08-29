@@ -1,7 +1,7 @@
 import { FaLinkedin } from "react-icons/fa";
 
 export const Footer = () => (
-  <footer className="bg-white/5 backdrop-blur-sm border-t border-white/10 fixed bottom-0 left-0 w-full z-10">
+  <footer className="bg-white/5 bg-glass border-t border-white/10 fixed bottom-0 left-0 w-full z-10">
     <div className="w-full flex justify-center items-center py-4 px-6 space-x-2">
       <span className="text-gray-400 text-sm font-light">
         © 2025 elmerjani. All rights reserved.

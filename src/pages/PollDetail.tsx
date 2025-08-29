@@ -136,7 +136,7 @@ const PollDetail = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-6 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl"
+            className="mt-6 p-6 bg-white/5 bg-glass border border-white/10 rounded-2xl"
           >
             <h3 className="text-lg font-medium text-white mb-4">
               Poll Information

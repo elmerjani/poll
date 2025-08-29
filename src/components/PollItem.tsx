@@ -60,7 +60,7 @@ export const PollItem: React.FC<PollItemProps> = ({
       transition={{ duration: 0.6 }}
       className="relative group mb-8 max-w-lg mx-auto"
     >
-      <motion.div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:border-white/20 relative overflow-hidden">
+      <motion.div className="bg-white/5 bg-glass border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:border-white/20 relative overflow-hidden">
        
 
         {/* Header with creator info */}
@@ -132,7 +132,7 @@ export const PollItem: React.FC<PollItemProps> = ({
                       : undefined,
                   }}
                   whileTap={{ scale: isConnected ? 0.98 : 1 }}
-                  className={`relative w-full p-4 rounded-xl backdrop-blur-sm border transition-all duration-300 overflow-hidden ${
+                  className={`relative w-full p-4 rounded-xl bg-glass border transition-all duration-300 overflow-hidden ${
                     isRecentVoted
                       ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-400/40"
                       : isTopOption
