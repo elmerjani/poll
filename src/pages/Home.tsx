@@ -47,7 +47,7 @@ const Home = () => {
               className="mt-6 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg max-w-md mx-auto"
             >
               <p className="text-blue-300 text-sm">
-                Login to create polls and vote
+                Login to create polls and vote. Only authenticated users can see live results.
               </p>
               
             </motion.div>
