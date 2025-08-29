@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { sortOptionsByVotes, timeAgo } from "../utils/constants";
 import { usePollRealtime } from "../hooks/usePollRealTime";
 import type { OptionExample } from "../types/poll";
+import { useAuth } from "react-oidc-context";
 
 interface PollItemProps {
   pollId: string;
@@ -12,6 +13,7 @@ interface PollItemProps {
   options: OptionExample[];
   createdBy?: string;
   createdAt?: string;
+  userOption?: number;
 }
 
 export const PollItem: React.FC<PollItemProps> = ({
@@ -20,17 +22,19 @@ export const PollItem: React.FC<PollItemProps> = ({
   options: initialOptions,
   createdBy,
   createdAt,
+  userOption: initialUserOption,
 }) => {
   const [clickedOption, setClickedOption] = useState<number | null>(null);
   const [isVoting, setIsVoting] = useState(false);
+  const auth = useAuth();
 
-  // Use real-time poll hook
-  const { options, updatedOptions, handleVote, isConnected } = usePollRealtime({
-    pollId,
-    initialOptions,
-  });
+  const { options, updatedOptions, handleVote, isConnected, userOption } =
+    usePollRealtime({
+      pollId,
+      initialOptions,
+      initialUserOption,
+    });
 
-  // Sort options by votes (highest first)
   const sortedOptions = sortOptionsByVotes(options);
   const totalVotes = sortedOptions.reduce(
     (sum, opt) => sum + opt.votesCount,
@@ -42,11 +46,7 @@ export const PollItem: React.FC<PollItemProps> = ({
 
     setIsVoting(true);
     setClickedOption(optionId);
-
-    // Send vote via WebSocket
     handleVote(optionId);
-
-    // Reset voting state after animation
     setTimeout(() => {
       setIsVoting(false);
       setClickedOption(null);
@@ -92,7 +92,7 @@ export const PollItem: React.FC<PollItemProps> = ({
           </div>
         </div>
 
-        {/* Question with link to detail */}
+        {/* Question */}
         {pollId ? (
           <Link to={`/poll/${pollId}`}>
             <h2 className="relative z-10 text-xl font-light text-white mb-6 leading-relaxed hover:text-blue-300 transition-colors duration-300 cursor-pointer">
@@ -112,7 +112,9 @@ export const PollItem: React.FC<PollItemProps> = ({
               const percent = totalVotes
                 ? Math.round((option.votesCount / totalVotes) * 100)
                 : 0;
-              const isClicked = clickedOption === option.id;
+
+              const isRecentVoted =
+                clickedOption === option.id || userOption === option.id;
               const isTopOption = index === 0 && option.votesCount > 0;
               const wasUpdated = updatedOptions.has(option.id);
 
@@ -125,8 +127,8 @@ export const PollItem: React.FC<PollItemProps> = ({
                   animate={{
                     opacity: 1,
                     x: 0,
-                    scale: isClicked ? 1.02 : wasUpdated ? 1.05 : 1,
-                    rotateY: isClicked ? 5 : 0,
+                    scale: clickedOption === option.id ? 1.02 : 1,
+                    rotateY: clickedOption === option.id ? 5 : 0,
                     boxShadow: wasUpdated
                       ? "0 0 30px rgba(34, 197, 94, 0.3)"
                       : "0 0 0px rgba(34, 197, 94, 0)",
@@ -147,36 +149,31 @@ export const PollItem: React.FC<PollItemProps> = ({
                   }}
                   whileTap={{ scale: isConnected ? 0.98 : 1 }}
                   className={`relative w-full p-4 rounded-xl backdrop-blur-sm border transition-all duration-300 overflow-hidden ${
-                    isTopOption
+                    isRecentVoted
+                      ? "bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-blue-400/40"
+                      : isTopOption
                       ? "bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-400/30"
                       : "bg-white/5 border-white/10 hover:border-white/20"
-                  } ${
-                    isVoting || !isConnected
-                      ? "opacity-70 cursor-not-allowed"
-                      : "cursor-pointer"
-                  } ${wasUpdated ? "ring-2 ring-green-400/50" : ""}`}
+                  } ${isVoting || !isConnected ? "opacity-70 cursor-not-allowed" : "cursor-pointer"} ${
+                    wasUpdated ? "ring-2 ring-green-400/50" : ""
+                  }`}
                 >
-                  {/* Progress bar background */}
+                  {/* Progress bar */}
                   <motion.div
                     className={`absolute inset-0 ${
-                      isTopOption
+                      isRecentVoted
+                        ? "bg-gradient-to-r from-blue-400/30 to-purple-400/30"
+                        : isTopOption
                         ? "bg-gradient-to-r from-green-400/30 to-emerald-400/30"
                         : "bg-gradient-to-r from-green-400/20 to-emerald-400/20"
                     }`}
                     initial={{ width: 0 }}
-                    animate={{
-                      width: `${percent}%`,
-                      opacity: isClicked ? 0.8 : wasUpdated ? 0.9 : 0.6,
-                    }}
-                    transition={{
-                      duration: 1,
-                      delay: index * 0.2,
-                      opacity: { duration: 0.3 },
-                    }}
+                    animate={{ width: `${percent}%`, opacity: 0.6 }}
+                    transition={{ duration: 1, delay: index * 0.2 }}
                   />
 
-                  {/* Click ripple effect */}
-                  {isClicked && (
+                  {/* Click ripple */}
+                  {clickedOption === option.id && (
                     <motion.div
                       className="absolute inset-0 bg-white/20 rounded-xl"
                       initial={{ scale: 0, opacity: 1 }}
@@ -185,69 +182,12 @@ export const PollItem: React.FC<PollItemProps> = ({
                     />
                   )}
 
-                  {/* Update pulse effect */}
-                  {wasUpdated && (
-                    <motion.div
-                      className="absolute inset-0 bg-green-400/20 rounded-xl"
-                      initial={{ scale: 1, opacity: 0 }}
-                      animate={{
-                        scale: [1, 1.05, 1],
-                        opacity: [0, 0.6, 0],
-                      }}
-                      transition={{
-                        duration: 0.8,
-                        times: [0, 0.5, 1],
-                      }}
-                    />
-                  )}
-
                   {/* Content */}
                   <div className="relative z-10 flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      {isTopOption && (
-                        <motion.span
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          className="text-yellow-400 text-sm"
-                        >
-                          👑
-                        </motion.span>
-                      )}
-                      <span className="font-medium text-white">
-                        {option.text}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <motion.span
-                        className={`text-sm font-semibold ${
-                          isTopOption ? "text-green-300" : "text-green-300"
-                        }`}
-                        animate={{
-                          scale: isClicked || wasUpdated ? 1.2 : 1,
-                          color: wasUpdated ? "#22c55e" : undefined,
-                        }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {percent}%
-                      </motion.span>
-                      <motion.span
-                        className={`text-xs px-2 py-1 rounded-lg ${
-                          isTopOption
-                            ? "text-green-200 bg-green-500/20 border border-green-400/30"
-                            : "text-gray-400 bg-white/10"
-                        }`}
-                        animate={{
-                          scale: isClicked || wasUpdated ? 1.1 : 1,
-                          rotateZ: isClicked ? 3 : 0,
-                          backgroundColor: wasUpdated
-                            ? "rgba(34, 197, 94, 0.2)"
-                            : undefined,
-                        }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {option.votesCount}
-                      </motion.span>
-                    </div>
+                    <span className="font-medium text-white">{option.text}</span>
+                    <span className="text-xs px-2 py-1 rounded-lg text-gray-400 bg-white/10">
+                      {option.votesCount} ({percent}%)
+                    </span>
                   </div>
                 </motion.button>
               );
@@ -265,14 +205,18 @@ export const PollItem: React.FC<PollItemProps> = ({
           <span className="mx-2" />
           <span
             className={`text-xs px-3 py-1 rounded-lg ${
-              !isConnected
+              !auth.isAuthenticated
+                ? "bg-yellow-500/10 text-yellow-300"
+                : !isConnected
                 ? "bg-red-500/10 text-red-300"
                 : isVoting
                 ? "bg-yellow-500/10 text-yellow-300"
                 : "bg-green-500/10 text-green-300"
             }`}
           >
-            {!isConnected
+            {!auth.isAuthenticated
+              ? "Login to vote"
+              : !isConnected
               ? "🔌 Reconnecting..."
               : isVoting
               ? "⏳ Voting..."

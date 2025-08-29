@@ -8,11 +8,9 @@ import { CreatePollFAB } from "../components/CreatePollFAB";
 import { useAuth } from "react-oidc-context";
 
 const Home = () => {
-  const { polls, loading, error, voteOnOption } = usePolls();
+  const { polls, loading, error, } = usePolls();
   const auth = useAuth();
-  const handleVote = (pollId: string, optionId: number) => {
-    voteOnOption(pollId, optionId);
-  };
+
 
   return (
     <div className="min-h-screen bg-black w-full">
@@ -103,6 +101,7 @@ const Home = () => {
                   options={poll.options}
                   createdBy={poll.owner.name}
                   createdAt={poll.createdAt}
+                  userOption={poll.userOption}
                 />
               </motion.div>
             ))}
