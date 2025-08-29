@@ -1,17 +1,22 @@
 import { api } from "./baseApi";
-import type {  PollExample } from "../types/poll";
-
+import type { PollExample } from "../types/poll";
 
 // Get a single poll by ID
 export const getPoll = async (pollId: string): Promise<PollExample> => {
   const response = await api.get(`/polls/${pollId}`);
   return response.data;
 };
-export const getPollAuth = async ({pollId, idToken}:{pollId:string, idToken:string}): Promise<PollExample> => {
-  const response = await api.get(`/pollsAuth/${pollId}`,{
-    headers:{
-      Authorization: idToken
-    }
+export const getPollAuth = async ({
+  pollId,
+  idToken,
+}: {
+  pollId: string;
+  idToken: string;
+}): Promise<PollExample> => {
+  const response = await api.get(`/pollsAuth/${pollId}`, {
+    headers: {
+      Authorization: idToken,
+    },
   });
   return response.data;
 };
@@ -34,18 +39,46 @@ export const createPollApi = async ({
   return response.data;
 };
 
-
 // Get all polls (simplified for current use - fetches first page)
-export const getAllPolls = async (): Promise<PollExample[]> => {
-  const response = await api.get("/polls");
+export const getAllPolls = async ({
+  limit = 10,
+  lastKey,
+}: {
+  limit?: number;
+  lastKey?: any;
+}): Promise<{
+  items: PollExample[];
+  lastKey?: string;
+}> => {
+  const queryParams = new URLSearchParams({
+    limit: limit.toString(),
+  });
+  if (lastKey) {
+    queryParams.append("lastKey", JSON.stringify(lastKey));
+  }
+  const response = await api.get(`/polls?${queryParams}`);
   return response.data;
 };
 
-export const getAllPollsAuth = async ({idToken}:{idToken:string}): Promise<PollExample[]> => {
-  const response = await api.get("/pollsAuth",{
-    headers:{
-      Authorization: idToken
-    }
+export const getAllPollsAuth = async ({
+  idToken,
+  limit = 10,
+  lastKey,
+}: {
+  idToken: string;
+  limit?: number;
+  lastKey?: any;
+}): Promise<{ items: PollExample[]; lastKey?: string }> => {
+  const queryParams = new URLSearchParams({
+    limit: limit.toString(),
   });
-  return response.data;
+  if (lastKey) {
+    queryParams.append("lastKey", JSON.stringify(lastKey));
+  }
+  const response = await api.get(`/pollsAuth?${queryParams}`, {
+    headers: {
+      Authorization: idToken,
+    },
+  });
+  return response.data
 };

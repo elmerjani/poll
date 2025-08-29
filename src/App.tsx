@@ -10,7 +10,6 @@ import { WebSocketProvider } from "./contexts/WebSocketContext";
 
 function App() {
   const auth = useAuth();
-  console.log(auth.user)
   if (auth.isLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">

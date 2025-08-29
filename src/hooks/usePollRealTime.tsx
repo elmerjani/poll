@@ -24,7 +24,6 @@ export const usePollRealtime = ({
   // Update options when initialOptions change (important for PollDetail)
   useEffect(() => {
     if (initialOptions.length > 0) {
-      console.log("Initializing options with:", initialOptions);
       setOptions(initialOptions);
     }
   }, [initialOptions]);
@@ -37,14 +36,11 @@ export const usePollRealtime = ({
   // Subscribe to WebSocket updates for this poll
   useEffect(() => {
     if (!pollId || !auth.isAuthenticated) {
-      console.log("Skipping WebSocket subscription - no pollId or not authenticated");
       return;
     }
 
-    console.log(`Setting up WebSocket subscription for poll ${pollId}`);
 
     const unsubscribe = subscribe(pollId, (data) => {
-      console.log(`Received update for poll ${pollId}:`, data);
 
       // Update options with new vote counts
       setOptions((prevOptions) => {
@@ -85,13 +81,11 @@ export const usePollRealtime = ({
       // Update user's vote if the update is from the current user
       const currentUserEmail = auth.user?.profile?.email;
       if (data.user?.email === currentUserEmail && data.optionId !== undefined) {
-        console.log(`Updating user vote to option ${data.optionId}`);
         setUserOption(data.optionId);
       }
     });
 
     return () => {
-      console.log(`Cleaning up WebSocket subscription for poll ${pollId}`);
       unsubscribe();
     };
   }, [pollId, subscribe, auth.isAuthenticated, auth.user?.profile?.email]);
@@ -109,7 +103,6 @@ export const usePollRealtime = ({
         return;
       }
 
-      console.log(`Sending vote for poll ${pollId}, option ${optionId}`);
       sendVote(pollId, optionId);
 
       // Optimistically update the user's vote

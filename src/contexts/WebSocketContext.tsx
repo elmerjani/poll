@@ -40,7 +40,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       const ws = new WebSocket(url);
       
       ws.onopen = () => {
-        console.log('WebSocket connected');
         setIsConnected(true);
         reconnectAttempts.current = 0;
       };
@@ -48,7 +47,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       ws.onmessage = (event) => {
         try {
           const data: WebSocketMessage = JSON.parse(event.data);
-          console.log('Received WebSocket message:', data);
           
           // Notify all subscribers for this pollId
           const pollSubscribers = subscribers.current.get(data.pollId);
@@ -61,14 +59,12 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       };
 
       ws.onclose = () => {
-        console.log('WebSocket disconnected');
         setIsConnected(false);
         setSocket(null);
         
         // Attempt to reconnect
         if (reconnectAttempts.current < maxReconnectAttempts) {
           reconnectAttempts.current++;
-          console.log(`Attempting to reconnect... (${reconnectAttempts.current}/${maxReconnectAttempts})`);
           setTimeout(connect, 2000 * reconnectAttempts.current);
         }
       };
@@ -97,7 +93,6 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     if (socket && isConnected) {
       const message = JSON.stringify({ pollId, optionId });
       socket.send(message);
-      console.log('Sent vote:', message);
     } else {
       console.warn('WebSocket not connected, cannot send vote');
     }

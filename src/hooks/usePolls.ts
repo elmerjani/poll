@@ -1,38 +1,68 @@
-import { useState, useEffect } from "react";
-import { getAllPolls, createPollApi, getAllPollsAuth } from "../api/polls";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { getAllPolls, getAllPollsAuth, createPollApi } from "../api/polls";
 import type { PollExample } from "../types/poll";
 import { useAuth } from "react-oidc-context";
 
-export function usePolls() {
-  const auth = useAuth()
+export function usePolls(limit = 12) {
+  const auth = useAuth();
   const [polls, setPolls] = useState<PollExample[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastKey, setLastKey] = useState<string | undefined>();
+  const [hasMore, setHasMore] = useState(true);
 
-  useEffect(() => {
-    fetchPolls();
-  }, []);
+  const loadingRef = useRef(false);
 
-  const fetchPolls = async () => {
-    try {
+  // Paginated fetch
+  const fetchPolls = useCallback(
+    async (reset = false) => {
+      if (loadingRef.current) return;
+      loadingRef.current = true;
       setLoading(true);
       setError(null);
-      // const apiPolls = await getAllPolls();
-      let apiPolls;
-      if(auth.isAuthenticated && auth.user && auth.user.id_token){
-        apiPolls = await getAllPollsAuth({idToken:auth.user.id_token})
+
+      try {
+        const params = {
+          limit,
+          lastKey: reset ? undefined : lastKey,
+        };
+        let response;
+        if (auth.isAuthenticated && auth.user?.id_token) {
+          response = await getAllPollsAuth({ idToken: auth.user.id_token, ...params });
+        } else {
+          response = await getAllPolls(params);
+        }
+
+        setPolls(prev => (reset ? response.items : [...prev, ...response.items]));
+        setLastKey(response.lastKey);
+        setHasMore(!!response.lastKey && response.items.length > 0);
+      } catch (err) {
+        console.error("Failed to fetch polls:", err);
+        setError("Failed to load polls");
+      } finally {
+        setLoading(false);
+        loadingRef.current = false;
       }
-      else{
-        apiPolls = await getAllPolls();
-      }
-      setPolls(apiPolls);
-    } catch (err) {
-      console.warn("Failed to fetch polls from API, using mock data:", err);
-      setError("Failed to load polls from server");
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    [auth.isAuthenticated, auth.user?.id_token, lastKey, limit]
+  );
+
+  // Load more polls for infinite scroll
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loading) return;
+    await fetchPolls(false);
+  }, [hasMore, loading, fetchPolls]);
+
+  // Refresh polls
+  const refreshPolls = useCallback(async () => {
+    setLastKey(undefined);
+    await fetchPolls(true);
+  }, [fetchPolls]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchPolls(true);
+  }, [auth.isAuthenticated]);
 
   // Create new poll
   const createPoll = async ({
@@ -46,7 +76,6 @@ export function usePolls() {
   }): Promise<string> => {
     try {
       const response = await createPollApi({ question, options, idToken });
-      console.log(response);
       return response.message;
     } catch (err) {
       console.error("Failed to create poll:", err);
@@ -57,43 +86,37 @@ export function usePolls() {
   // Vote on option (local update + API call)
   const voteOnOption = async (pollId: string, optionId: number) => {
     try {
-      // Optimistic update
-      setPolls((prevPolls) =>
-        prevPolls.map((poll) =>
-          poll.pollId === pollId || poll.pollId === pollId
+      setPolls(prev =>
+        prev.map(poll =>
+          poll.pollId === pollId
             ? {
                 ...poll,
-                options: poll.options.map((option) =>
+                options: poll.options.map(option =>
                   option.id === optionId
-                    ? { ...option, votes: option.votesCount + 1 }
+                    ? { ...option, votesCount: option.votesCount + 1 }
                     : option
                 ),
               }
             : poll
         )
       );
-
-      // If you implement a voting endpoint, uncomment this:
+      // Uncomment and implement API call if needed
       // await votePoll(pollId, { optionId });
     } catch (err) {
       console.error("Failed to vote:", err);
-      // Revert optimistic update on error
-      await fetchPolls();
+      await fetchPolls(true); // revert
     }
-  };
-
-  // Refresh polls
-  const refreshPolls = () => {
-    fetchPolls();
   };
 
   return {
     polls,
     loading,
     error,
-    createPoll, // NEW: Create poll function
-    voteOnOption,
+    hasMore,
+    loadMore,
     refreshPolls,
-    setPolls, // Keep for backward compatibility
+    createPoll,
+    voteOnOption,
+    setPolls,
   };
 }

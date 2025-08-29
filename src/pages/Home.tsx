@@ -1,19 +1,21 @@
-import { usePolls } from "../hooks/usePolls";
 import { PollItem } from "../components/PollItem";
 import { Header } from "../layout/Header";
 import { Footer } from "../layout/Footer";
+import { InfiniteScroll } from "../components/InfiniteScroll";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { CreatePollFAB } from "../components/CreatePollFAB";
 import { useAuth } from "react-oidc-context";
+import { usePolls } from "../hooks/usePolls";
 
 const Home = () => {
-  const { polls, loading, error } = usePolls();
   const auth = useAuth();
+  const { polls, loading, error, hasMore, loadMore, refreshPolls } = usePolls(12);
 
   return (
     <div className="min-h-screen bg-black w-full">
       <Header />
+
       <main className="w-full py-12 px-6 pb-24">
         {/* Header */}
         <motion.div
@@ -29,17 +31,23 @@ const Home = () => {
           <p className="text-xl text-gray-400 font-light max-w-2xl mx-auto leading-relaxed">
             Vote on the latest polls and see real-time results
           </p>
+
           {error && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="mt-4 p-3 bg-yellow-500/10 border border-yellow-400/30 rounded-lg max-w-md mx-auto"
+              className="mt-4 p-3 bg-red-500/10 border border-red-400/30 rounded-lg max-w-md mx-auto"
             >
-              <p className="text-yellow-300 text-sm">⚠️ {error}</p>
+              <p className="text-red-300 text-sm">{error}</p>
+              <button
+                onClick={refreshPolls}
+                className="mt-2 px-3 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-400/40 rounded-lg text-red-200 text-xs transition-colors"
+              >
+                Try Again
+              </button>
             </motion.div>
           )}
 
-          {/* Login message if not authenticated */}
           {!auth.isAuthenticated && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -49,42 +57,58 @@ const Home = () => {
               <p className="text-blue-300 text-sm">
                 Login to create polls and vote. Only authenticated users can see live results.
               </p>
-              
             </motion.div>
           )}
         </motion.div>
 
-        {/* Loading State */}
-        {loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-16"
-          >
-            <div className="w-16 h-16 border-4 border-green-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-white text-xl font-light">Loading polls...</p>
-          </motion.div>
+        {/* Initial Loading Spinner */}
+        {loading && polls.length === 0 && (
+          <div className="flex justify-center items-center py-16">
+            <div className="w-16 h-16 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+            <span className="ml-4 text-white text-lg font-light">Loading polls...</span>
+          </div>
         )}
 
-        {/* Empty State */}
-        {!loading && polls.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center py-16"
-          >
-            <div className="flex justify-center mb-6">
-              <div className="bg-white rounded-lg ">
-                <img
-                  src="/logo.png"
-                  alt="App Logo"
-                  className="w-10 h-10 rounded-lg"
-                />
+        {/* Polls */}
+        {polls.length > 0 && (
+          <InfiniteScroll
+            hasMore={hasMore}
+            loading={loading}
+            onLoadMore={loadMore}
+            className="poll-grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 w-full px-4"
+            loadingComponent={
+              <div className="col-span-full flex justify-center items-center py-8">
+                <div className="w-8 h-8 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+                <span className="ml-3 text-gray-400">Loading more polls...</span>
               </div>
-            </div>
-            <h2 className="text-xl text-gray-400 mb-2">No polls yet</h2>
-            <p className="text-gray-500 mb-6">Be the first to create a poll!</p>
+            }
+          >
+            {polls.map((poll, index) => (
+              <motion.div
+                key={poll.pollId}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: (index % 12) * 0.05 }}
+                className="h-full"
+              >
+                <PollItem
+                  pollId={poll.pollId}
+                  question={poll.question}
+                  options={poll.options}
+                  createdBy={poll.owner?.name}
+                  createdAt={poll.createdAt}
+                  userOption={poll.userOption}
+                />
+              </motion.div>
+            ))}
+          </InfiniteScroll>
+        )}
+
+        {/* Empty state */}
+        {!loading && polls.length === 0 && (
+          <div className="text-center py-16 text-gray-400">
+            <h2 className="text-xl mb-2">No polls yet</h2>
+            <p className="mb-6">Be the first to create a poll!</p>
             {auth.isAuthenticated && (
               <Link
                 to="/create"
@@ -94,36 +118,11 @@ const Home = () => {
                 <span>Create First Poll</span>
               </Link>
             )}
-          </motion.div>
-        )}
-
-        {/* Polls */}
-        {!loading && polls.length > 0 && (
-          <div className="poll-grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 w-full px-4">
-            {polls.map((poll, index) => (
-              <motion.div
-                key={poll.pollId}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="h-full"
-              >
-                <PollItem
-                  pollId={poll.pollId}
-                  question={poll.question}
-                  options={poll.options}
-                  createdBy={poll.owner.name}
-                  createdAt={poll.createdAt}
-                  userOption={poll.userOption}
-                />
-              </motion.div>
-            ))}
           </div>
         )}
       </main>
-      <Footer />
 
-      {/* Floating Action Button */}
+      <Footer />
       {auth.isAuthenticated && <CreatePollFAB />}
     </div>
   );

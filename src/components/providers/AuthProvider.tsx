@@ -11,7 +11,6 @@ const cognitoAuthConfig = {
 };
 
 export default function Component({ children }: { children: ReactNode }) {
-  console.log(cognitoAuthConfig);
   return (
     <AuthProvider
       {...cognitoAuthConfig}
