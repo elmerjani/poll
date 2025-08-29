@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Header } from "../layout/Header";
 import { Footer } from "../layout/Footer";
@@ -42,7 +42,11 @@ const PollDetail = () => {
       <div className="min-h-screen bg-black">
         <Header />
         <main className="w-full py-12 px-6">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-16"
+          >
             <div className="w-16 h-16 border-4 border-green-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-white text-xl font-light">Loading poll...</p>
           </motion.div>
@@ -56,11 +60,22 @@ const PollDetail = () => {
       <div className="min-h-screen bg-black">
         <Header />
         <main className="w-full py-12 px-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center py-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-16"
+          >
             <div className="text-red-400 text-6xl mb-4">⚠️</div>
-            <h2 className="text-3xl font-light text-white mb-4">Poll not found</h2>
-            <p className="text-gray-400">The poll you're looking for doesn't exist.</p>
-            <Link to="/" className="inline-block mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300">
+            <h2 className="text-3xl font-light text-white mb-4">
+              Poll not found
+            </h2>
+            <p className="text-gray-400">
+              The poll you're looking for doesn't exist.
+            </p>
+            <Link
+              to="/"
+              className="inline-block mt-6 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300"
+            >
               Back to Polls
             </Link>
           </motion.div>
@@ -75,15 +90,32 @@ const PollDetail = () => {
       <main className="w-full py-12 px-6 pb-24">
         <div className="max-w-6xl mx-auto">
           {/* Poll Header */}
-          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-light text-white mb-6 tracking-wide">Poll Details</h1>
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-12"
+          >
+            <h1 className="text-4xl md:text-5xl font-light text-white mb-6 tracking-wide">
+              Poll Details
+            </h1>
             <div className="h-px w-32 bg-gradient-to-r from-transparent via-white to-transparent mx-auto opacity-30 mb-8"></div>
-            <p className="text-xl text-gray-400 font-light max-w-2xl mx-auto leading-relaxed">Real-time voting results</p>
+            <p className="text-xl text-gray-400 font-light max-w-2xl mx-auto leading-relaxed">
+              Real-time voting results
+            </p>
           </motion.div>
 
           {/* Back Button */}
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="mb-8 max-w-2xl mx-auto">
-            <Link to="/" className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors duration-300">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="mb-8 max-w-2xl mx-auto"
+          >
+            <Link
+              to="/"
+              className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors duration-300"
+            >
               <span>←</span>
               <span className="text-sm">Back to Polls</span>
             </Link>
@@ -100,16 +132,27 @@ const PollDetail = () => {
           />
 
           {/* Additional Poll Information */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.4 }} className="mt-6 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
-            <h3 className="text-lg font-medium text-white mb-4">Poll Information</h3>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mt-6 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl"
+          >
+            <h3 className="text-lg font-medium text-white mb-4">
+              Poll Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-gray-400">Created by:</span>
-                <span className="text-white ml-2">{poll.owner?.name || poll.owner?.email || "Anonymous"}</span>
+                <span className="text-white ml-2">
+                  {poll.owner?.name || poll.owner?.email || "Anonymous"}
+                </span>
               </div>
               <div>
                 <span className="text-gray-400">Poll ID:</span>
-                <span className="text-white ml-2 font-mono text-xs">{poll.pollId}</span>
+                <span className="text-white ml-2 font-mono text-xs">
+                  {poll.pollId}
+                </span>
               </div>
               <div>
                 <span className="text-gray-400">Total options:</span>
