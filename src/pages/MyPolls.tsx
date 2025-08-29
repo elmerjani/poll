@@ -5,6 +5,7 @@ import { CreatePollFAB } from "../components/CreatePollFAB";
 import { PollItem } from "../components/PollItem";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import type { PollExample } from "../types/poll";
 
 export default function MyPollsPage() {
@@ -62,6 +63,20 @@ export default function MyPollsPage() {
             Manage and view your created polls
           </p>
         </motion.div>
+        <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="mb-8"
+          >
+            <Link
+              to="/"
+              className="inline-flex items-center space-x-2 text-gray-400 hover:text-white transition-colors duration-300"
+            >
+              <span>←</span>
+              <span className="text-sm">Back to Polls</span>
+            </Link>
+          </motion.div>
 
         {/* Loading State */}
         {loading && polls.length === 0 && (
