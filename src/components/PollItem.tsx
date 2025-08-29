@@ -61,23 +61,7 @@ export const PollItem: React.FC<PollItemProps> = ({
       className="relative group mb-8 max-w-lg mx-auto"
     >
       <motion.div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 transition-all duration-300 hover:border-white/20 relative overflow-hidden">
-        {/* Connection status indicator */}
-        <div className="absolute top-4 right-4 z-20">
-          <motion.div
-            animate={{
-              scale: isConnected ? [1, 1.2, 1] : 1,
-              opacity: isConnected ? 1 : 0.5,
-            }}
-            transition={{
-              scale: { duration: 2, repeat: Infinity },
-              opacity: { duration: 0.3 },
-            }}
-            className={`w-3 h-3 rounded-full ${
-              isConnected ? "bg-green-400" : "bg-red-400"
-            }`}
-            title={isConnected ? "Real-time connected" : "Disconnected"}
-          />
-        </div>
+       
 
         {/* Header with creator info */}
         <div className="relative z-10 flex items-center mb-4">

@@ -8,9 +8,8 @@ import { CreatePollFAB } from "../components/CreatePollFAB";
 import { useAuth } from "react-oidc-context";
 
 const Home = () => {
-  const { polls, loading, error, } = usePolls();
+  const { polls, loading, error } = usePolls();
   const auth = useAuth();
-
 
   return (
     <div className="min-h-screen bg-black w-full">
@@ -37,6 +36,20 @@ const Home = () => {
               className="mt-4 p-3 bg-yellow-500/10 border border-yellow-400/30 rounded-lg max-w-md mx-auto"
             >
               <p className="text-yellow-300 text-sm">⚠️ {error}</p>
+            </motion.div>
+          )}
+
+          {/* Login message if not authenticated */}
+          {!auth.isAuthenticated && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-6 p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg max-w-md mx-auto"
+            >
+              <p className="text-blue-300 text-sm">
+                Login to create polls and vote
+              </p>
+              
             </motion.div>
           )}
         </motion.div>
