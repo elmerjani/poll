@@ -84,7 +84,7 @@ const CreatePoll = () => {
     try {
       await createPoll(pollData);
       setSuccessMsg("Poll created successfully!");
-      setTimeout(() => navigate("/"), 1200);
+      setTimeout(() => navigate("/polls/me"), 1200);
     } catch (err) {
       const errorMessage = (err as Error)?.message || "Failed to create poll.";
       setErrorMsg(errorMessage);

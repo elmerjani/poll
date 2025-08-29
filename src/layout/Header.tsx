@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import { useAuth } from "react-oidc-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { FiHome, FiLogOut, FiLogIn } from "react-icons/fi";
+import { FiStar, FiHome, FiLogOut, FiLogIn } from "react-icons/fi";
 
 export const Header: React.FC = () => {
   const auth = useAuth();
@@ -106,6 +106,12 @@ export const Header: React.FC = () => {
                       className="px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2"
                     >
                       <FiHome className="inline-block text-lg" /> Home
+                    </Link>
+                    <Link
+                      to="/polls/me"
+                      className="px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center gap-2"
+                    >
+                      <FiStar className="inline-block text-lg" /> My Polls
                     </Link>
                     <button
                       onClick={() => {

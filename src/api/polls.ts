@@ -1,8 +1,8 @@
 import { api } from "./baseApi";
-import type { PollExample } from "../types/poll";
+import type { PollExample, PollWithVotes } from "../types/poll";
 
 // Get a single poll by ID
-export const getPoll = async (pollId: string): Promise<PollExample> => {
+export const getPoll = async (pollId: string): Promise<PollWithVotes> => {
   const response = await api.get(`/polls/${pollId}`);
   return response.data;
 };
@@ -12,7 +12,7 @@ export const getPollAuth = async ({
 }: {
   pollId: string;
   idToken: string;
-}): Promise<PollExample> => {
+}): Promise<PollWithVotes> => {
   const response = await api.get(`/pollsAuth/${pollId}`, {
     headers: {
       Authorization: idToken,
@@ -80,5 +80,43 @@ export const getAllPollsAuth = async ({
       Authorization: idToken,
     },
   });
-  return response.data
+  return response.data;
+};
+
+export const getMyPolls = async ({
+  idToken,
+  limit = 10,
+  lastKey,
+}: {
+  idToken: string;
+  limit?: number;
+  lastKey?: string;
+}): Promise<{ items: PollExample[]; lastKey?: string }> => {
+  const queryParams = new URLSearchParams({
+    limit: limit.toString(),
+  });
+  if (lastKey) {
+    queryParams.append("lastKey", JSON.stringify(lastKey));
+  }
+  const response = await api.get(`/myPolls?${queryParams}`, {
+    headers: {
+      Authorization: idToken,
+    },
+  });
+  return response.data;
+};
+
+export const deletePollApi = async ({
+  pollId,
+  idToken,
+}: {
+  pollId: string;
+  idToken: string;
+}) => {
+  const response = await api.delete(`/polls/${pollId}`, {
+    headers: {
+      Authorization: idToken,
+    },
+  });
+  return response.data;
 };

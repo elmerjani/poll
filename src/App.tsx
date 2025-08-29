@@ -7,6 +7,7 @@ import CreatePoll from "./pages/CreatePoll";
 import { motion } from "framer-motion";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { WebSocketProvider } from "./contexts/WebSocketContext";
+import MyPolls from "./pages/MyPolls";
 
 function App() {
   const auth = useAuth();
@@ -37,6 +38,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CreatePoll />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/polls/me"
+            element={
+              <ProtectedRoute>
+                <MyPolls />
               </ProtectedRoute>
             }
           />

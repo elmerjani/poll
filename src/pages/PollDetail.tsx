@@ -6,12 +6,12 @@ import { motion } from "framer-motion";
 import { getPoll, getPollAuth } from "../api/polls";
 import { PollItem } from "../components/PollItem";
 import { useAuth } from "react-oidc-context";
-import type { PollExample } from "../types/poll";
+import type {  PollWithVotes } from "../types/poll";
 
 const PollDetail = () => {
   const { id } = useParams<{ id: string }>();
   const auth = useAuth();
-  const [poll, setPoll] = useState<PollExample | null>(null);
+  const [poll, setPoll] = useState<PollWithVotes | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ const PollDetail = () => {
 
     fetchPoll();
   }, [id]);
-
+  console.log(poll);
   if (loading)
     return (
       <div className="min-h-screen bg-black">
@@ -155,11 +155,101 @@ const PollDetail = () => {
                 </span>
               </div>
               <div>
+                <span className="text-gray-400">Total votes:</span>
+                <span className="text-white ml-2">
+                  {poll.votes?.length || 0}
+                </span>
+              </div>
+              <div>
                 <span className="text-gray-400">Total options:</span>
                 <span className="text-white ml-2">{poll.options.length}</span>
               </div>
             </div>
           </motion.div>
+
+          {/* Voter Details Section */}
+          {poll.votes && poll.votes.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="mt-6 p-6 bg-white/5 bg-glass border border-white/10 rounded-2xl"
+            >
+              <h3 className="text-lg font-medium text-white mb-6 flex items-center">
+                <span className="w-2 h-2 bg-green-400 rounded-full mr-3"></span>
+                Voter Breakdown
+              </h3>
+
+              <div className="space-y-6">
+                {poll.options.map((option) => {
+                  const optionVoters = poll.votes.filter(
+                    (vote) => vote.optionId === option.id
+                  );
+
+                  if (optionVoters.length === 0) return null;
+
+                  return (
+                    <div
+                      key={option.id}
+                      className="border-l-2 border-blue-400/30 pl-4"
+                    >
+                      <div className="flex items-center mb-3">
+                        <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full mr-3"></div>
+                        <h4 className="text-white font-medium">
+                          {option.text}
+                        </h4>
+                        <span className="ml-auto text-xs text-gray-400 bg-white/10 px-2 py-1 rounded-full">
+                          {optionVoters.length} vote
+                          {optionVoters.length !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+
+                      <div className="grid gap-2">
+                        {optionVoters.map((vote, index) => (
+                          <div
+                            key={`${vote.optionId}-${index}`}
+                            className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:border-white/10 transition-colors duration-200"
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                {vote.user.name
+                                  ? vote.user.name.charAt(0).toUpperCase()
+                                  : vote.user.email.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="text-white text-sm font-medium">
+                                  {vote.user.name || vote.user.email}
+                                </p>
+                                {vote.user.name && (
+                                  <p className="text-gray-400 text-xs">
+                                    {vote.user.email}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-gray-400 text-xs">
+                                {new Date(vote.createdAt).toLocaleDateString()}
+                              </p>
+                              <p className="text-gray-500 text-xs">
+                                {new Date(vote.createdAt).toLocaleTimeString(
+                                  [],
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
         </div>
       </main>
       <Footer />
