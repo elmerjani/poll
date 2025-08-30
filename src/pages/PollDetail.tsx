@@ -220,11 +220,6 @@ const PollDetail = () => {
                                 <p className="text-white text-sm font-medium truncate">
                                   {vote.user.name || vote.user.email}
                                 </p>
-                                {vote.user.name && (
-                                  <p className="text-gray-400 text-xs truncate">
-                                    {vote.user.email}
-                                  </p>
-                                )}
                                 <div className="sm:hidden mt-1 flex items-center space-x-1 text-xs text-gray-400">
                                   <span>
                                     {new Date(
