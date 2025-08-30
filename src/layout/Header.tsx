@@ -116,8 +116,8 @@ export const Header: React.FC = () => {
                     <button
                       onClick={() => {
                         setShowUserMenu(false);
-                        auth.removeUser();
                         signOutRedirect();
+                        auth.removeUser();
                       }}
                       className="w-full text-left px-4 py-2 text-sm text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-colors flex items-center gap-2"
                     >
