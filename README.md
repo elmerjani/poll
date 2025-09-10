@@ -4,7 +4,8 @@ This is the **frontend** of the Polling App, built with **React + Vite**.
 It connects to the backend (AWS Lambda + API Gateway + DynamoDB) and uses **Amazon Cognito** for authentication.
 
 ---
-
+## Architecture
+![project architecture](public/architecture.png)
 ## 🚀 Getting Started
 
 ### 1. Backend Requirement
