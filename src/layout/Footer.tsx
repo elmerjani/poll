@@ -7,7 +7,7 @@ export const Footer = () => (
         © 2025 elmerjani. All rights reserved.
       </span>
       <a
-        href="https://www.linkedin.com/in/your-linkedin-handle/"
+        href="https://www.linkedin.com/in/elmerjani"
         target="_blank"
         rel="noopener noreferrer"
         className="text-blue-400 hover:text-blue-500 transition-colors duration-300"
